@@ -1,11 +1,18 @@
 <?php
-
+/****************************
+ * 프로젝트명 : lrv_board
+ * 디렉토리 : Contrllers
+ * 파일명 : BoardsController.php
+ * 이력 : v001 0526 sj.chae new
+ *        v002 0530 sj.chae 유효성 체크 추가 update
+*****************************/
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Boards;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Validator; // v002 add
 
 class BoardsController extends Controller
 {
@@ -38,6 +45,15 @@ class BoardsController extends Controller
      */
     public function store(Request $req)
     {
+        // v002 add start
+        // 게시판 유효성 체크
+        $req->validate([ // validate에서 에러 발생시 view에 errors 변수
+            // 필수 입력 값, 최소/최대 입력 값 지정
+            // * | : or, between(min, max), max:num, min:num
+            'title' => 'required|between:3,30'
+            ,'content' => 'required|max:1000'
+        ]);
+        // v002 add end
         // insert
         $boards = new Boards([
         // ? new Boards : 새로운 엘로퀀트 객체 생성, db에서 가져오는 값이 아님(insert, 입력)
@@ -87,6 +103,51 @@ class BoardsController extends Controller
      */
     public function update(Request $request, $id)
     {
+        // v002 add start
+
+        // 유효성 검사 방법 1
+        // id를 리퀘스트 객체로 병합
+        $arr = ['id' => $id];
+        // $request->merge($arr);
+        $request->request->add($arr);
+
+        // $request->validate([
+        //     'title' => 'required|between:3,30'
+        //     ,'content' => 'required|max:1000'
+        //     ,'id' => 'required|integer'
+        // ]);
+        // 숫자 체크 : numeric(정수), integer(데이터형에 상관없이)
+        // * 유효성 체크 항목도 요구명세서에 작성
+
+        // 유효성 검사 방법 2
+        // ! 띄어쓰기 조심하기
+        $validator = Validator::make($request->only('id', 'title', 'content'), [
+                'id' => 'required|integer'
+                ,'title' => 'required|between:3,30'
+                ,'content' => 'required|max:1000'
+            ]
+        );
+        if($validator->fails()){
+            return redirect()->back()
+            ->withErrors($validator)
+            ->withInput($request->only('title', 'content'));
+        }
+
+
+        // $validator = Validator::make($request->only('id', 'title', 'content'), [
+        //     'id'         => 'required|integer'
+        //     ,'title'     => 'required|between:3,30'
+        //     ,'content'   => 'required|max:1000'
+        // ]);
+        // if ($validator->fails()) {
+        //         return redirect()->back()
+        //             ->withErrors($validator)
+        //             ->withInput($request->only('title', 'content')); // 필요한 값만 세션에 전달 가능
+        //     }
+
+        
+        // v002 add end
+
         // 엘로퀀트
         $boards = Boards::find($id);
         // $boards->title = $request->title;
@@ -110,7 +171,7 @@ class BoardsController extends Controller
         // redirect
         // * 페이지 결과(update...)가 다를 때는 redirect를 통해 페이지 이동
         // return redirect('/boards/'.$id);
-        return redirect()->route('board.show', ['board' => $id]);
+        return redirect()->route('boards.show', ['board' => $id]);
 
     }
 
