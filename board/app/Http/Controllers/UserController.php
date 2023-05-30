@@ -29,6 +29,9 @@ class UserController extends Controller
         if(!$user || !(Hash::check($req->password, $user->password))){
             $errors[] = '아이디와 비밀번호를 확인해 주세요.';
             return redirect()->back()->with('errors', collect($errors));
+            // collect() : 여러 작업을 연속적으로 수행할 수 있도록 체이닝을 지원하는 메서드 제공
+            // 배열의 대체제로 사용가능(array 타입으로 타입힌트된 경우가 아니라면 배열이 사용되는 모든 경우에 사용가능함)
+            // php의 배열에 비해 laravel의 컬렉션이 사용할 수 있는 메서드 수가 많음
         }
 
         // 유저 인증 작업
