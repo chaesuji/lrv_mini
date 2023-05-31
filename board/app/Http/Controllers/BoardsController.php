@@ -5,6 +5,7 @@
  * 파일명 : BoardsController.php
  * 이력 : v001 0526 sj.chae new
  *        v002 0530 sj.chae 유효성 체크 추가 update
+ *        v003 0531 sj.chae auth check 추가 index
 *****************************/
 namespace App\Http\Controllers;
 
@@ -23,6 +24,12 @@ class BoardsController extends Controller
      */
     public function index()
     {
+        // v003 auth check
+        // * 로그인을 하지 않은 유저의 접근 막기
+        // $this->logincheck();
+        if(auth()->guest())
+        return redirect()->route('users.login');
+        // v003 end
         $result = Boards::select('id','title','hits','created_at','updated_at')->orderBy('hits', 'desc')->get();
         return view('List')->with('data', $result);
     }
@@ -190,4 +197,9 @@ class BoardsController extends Controller
         // ! DB::update()->delete() === 모든 코드 삭제
         return redirect('/boards');
     }
+
+    // public function logincheck(){
+    //     if(auth()->guest())
+    //     return redirect()->route('users.login');
+    // }
 }

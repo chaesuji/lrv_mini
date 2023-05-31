@@ -4,7 +4,7 @@
 
 @section('contents')
 @include('layout.errorsvaildate')
-<div>{{isset($success) ? $success : ""}}</div>
+<div>{!!session()->has('success') ? session('success') : ""!!}</div>
     <form action="{{route('users.login.post')}}" method="post">
         @csrf
         <label for="email">email : </label>
