@@ -93,7 +93,8 @@ class UserController extends Controller
     function useredit(){
         // $id = session('id');
         // $data = User::find($id);
-        $data = User::find(Auth::User()->id);
+        $data = Auth::User();
+        // $data = User::find(Auth::User()->id);
 
         return view('useredit')->with('data', $data);
     }
@@ -169,7 +170,8 @@ class UserController extends Controller
 
         $arrKey = []; // 수정할 항목을 배열에 담는 변수
 
-        $baseUser = User::find(Auth::User()->id); // 기존 데이터 획득
+        $baseUser = Auth::User(); // 기존 데이터 획득 || Boards::find()
+        // $baseUser = Boards::find(Auth::User()->id); // 기존 데이터 획득
 
         // 기존 패스워드 체크
         if(!Hash::check($req->bpassword, $baseUser->password)) {
