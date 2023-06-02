@@ -12,12 +12,27 @@ use Illuminate\support\Facades\Hash;
 use Illuminate\support\Facades\Auth;
 use Illuminate\support\Facades\Session;
 use App\Models\User;
-// use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
+use App\Models\Boards;
 
 
 class UserController extends Controller
 {
     function login(){
+
+        $arr['key'] = 'test';
+        $arr['kim'] = 'park';
+
+        Log::emergency('emergency', $arr);
+        Log::alert('alert', $arr);
+        Log::critical('critical', $arr);
+        Log::error('error', $arr);
+        Log::warning('warning', $arr);
+        Log::notice('notice', $arr);
+        Log::info('info', $arr);
+        Log::debug('debug', $arr);
+
         return view('login');
     }
 
@@ -32,6 +47,7 @@ class UserController extends Controller
         if(!$user || !(Hash::check($req->password, $user->password))){
             $error = '아이디와 비밀번호를 확인해 주세요.';
             return redirect()->back()->with('error', $error);
+            // redirect()->with() : 세션에 등록
             // collect() : 여러 작업을 연속적으로 수행할 수 있도록 체이닝을 지원하는 메서드 제공
             // 배열의 대체제로 사용가능(array 타입으로 타입힌트된 경우가 아니라면 배열이 사용되는 모든 경우에 사용가능함)
             // php의 배열에 비해 laravel의 컬렉션이 사용할 수 있는 메서드 수가 많음
@@ -41,8 +57,9 @@ class UserController extends Controller
         Auth::login($user);
         if(Auth::check()){
             session($user->only('id')); // 세션에 인증된 회원 pk 등록
-            // * session($user->only('id')) : 배열 형식
+            // session($user->only('id')) : 배열 형식
             return redirect()->intended(route('boards.index'));
+            // * intended : 유저 인증을 한 직후에만 사용가능, 원래 접속했던 url로 이동/접속했던 url이 없으면 ()안의 URL로 이동함
         }else{
             $error = '유저 인증 작업 에러';
             return redirect()->back()->with('error', $error);
@@ -97,6 +114,7 @@ class UserController extends Controller
         // $data = User::find(Auth::User()->id);
 
         return view('useredit')->with('data', $data);
+        // view()->with() : view로 데이터 전달
     }
 
     function usereditpost(Request $req){
@@ -170,8 +188,8 @@ class UserController extends Controller
 
         $arrKey = []; // 수정할 항목을 배열에 담는 변수
 
-        $baseUser = Auth::User(); // 기존 데이터 획득 || Boards::find()
-        // $baseUser = Boards::find(Auth::User()->id); // 기존 데이터 획득
+        // $baseUser = Auth::User(); // 기존 데이터 획득 || Boards::find()
+        $baseUser = Boards::find(Auth::User()->id); // 기존 데이터 획득
 
         // 기존 패스워드 체크
         if(!Hash::check($req->bpassword, $baseUser->password)) {
